@@ -1,0 +1,12 @@
+# PersonaBEAM dependencies
+# Inference (run_inference.py)
+openai>=1.30.0
+anthropic>=0.30.0
+google-genai>=1.0.0
+
+# Analysis (run_analysis.py)
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+matplotlib>=3.7.0
+pyarrow>=12.0.0
