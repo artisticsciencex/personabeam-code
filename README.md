@@ -2,30 +2,36 @@
 
 This repository contains the inference and analysis code for the PersonaBEAM benchmark, which evaluates persona conditioning effects in vision-language model (VLM)-based embodied agent control.
 
+**Dataset:** [huggingface.co/datasets/qzkiyoshi/personabeam](https://huggingface.co/datasets/qzkiyoshi/personabeam)
+
 ## Repository Structure
 
 ```
 personabeam-code/
 ├── README.md               # this file
 ├── requirements.txt        # Python dependencies
-├── LICENSE                 # CC-BY-4.0
+├── LICENSE                 # MIT
+├── reproduce_all.sh        # one-command reproduction
 ├── run_inference.py        # cross-model inference pipeline
 ├── run_analysis.py         # reproduces all paper figures and tables
-└── outputs/                # default output directory
+└── outputs/                # default output directory (gitignored)
 ```
 
-## Setup
+## Quick Reproduction
 
 ```bash
-# Clone the repository
-git clone <this-repo-url>
+git clone https://github.com/artisticsciencex/personabeam-code.git
 cd personabeam-code
+bash reproduce_all.sh
+```
 
-# Create virtual environment (recommended)
+This downloads the dataset from Hugging Face, runs the full analysis, and saves all figures and tables to `outputs/`.
+
+## Setup (Manual)
+
+```bash
 python -m venv .venv
 source .venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
@@ -46,8 +52,6 @@ For open-weight models (Qwen3.6-35B-A3B, Gemma 4 31B), you need a local serving 
 ## Usage
 
 ### 1. Reproduce Paper Results (Analysis Only)
-
-Download the dataset from the companion Hugging Face repository, then:
 
 ```bash
 python run_analysis.py \
@@ -99,15 +103,13 @@ Each model produces a CSV file in the output directory (`results_<model>.csv`). 
 
 ## Models Evaluated
 
-| Model | Type | Backend | Notes |
-|-------|------|---------|-------|
-| GPT-5.5 | Closed | OpenAI API | `reasoning_effort="none"` for determinism |
-| Gemini 3.1 Pro | Closed | Vertex AI | `thinking_level="LOW"` |
-| Claude Opus 4.7 | Closed | Anthropic API | Thinking off by default |
-| Qwen3.6-35B-A3B | Open | vLLM (local) | MoE, 35B total / 3B active |
-| Gemma 4 31B | Open | Ollama (local) | Dense 31B |
-
-All models use `temperature=0.0` for reproducibility.
+| Model | Type | Backend | Config |
+|-------|------|---------|--------|
+| GPT-5.5 | Closed | OpenAI API | `temperature=0.0`, `reasoning_effort="none"` |
+| Gemini 3.1 Pro | Closed | Vertex AI | `temperature=0.0`, thinking enabled (`thinking_level="LOW"`) |
+| Claude Opus 4.7 | Closed | Anthropic API | `temperature=0.0`, thinking disabled |
+| Qwen3.6-35B-A3B | Open | vLLM (local) | `temperature=0.0`, thinking disabled; MoE, 35B total / 3B active |
+| Gemma 4 31B | Open | Ollama (local) | `temperature=0.0`; dense 31B |
 
 ## Personas
 
@@ -130,4 +132,5 @@ When run on the full dataset (757 images x 3 personas x 5 models = 11,328 valid 
 
 ## License
 
-CC-BY-4.0. See [LICENSE](LICENSE) for details.
+Code: MIT. See [LICENSE](LICENSE).
+Dataset: CC-BY-4.0. See the [Hugging Face repository](https://huggingface.co/datasets/qzkiyoshi/personabeam).
