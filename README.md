@@ -8,13 +8,14 @@ This repository contains the inference and analysis code for the PersonaBEAM ben
 
 ```
 personabeam-code/
-├── README.md               # this file
-├── requirements.txt        # Python dependencies
-├── LICENSE                 # MIT
-├── reproduce_all.sh        # one-command reproduction
-├── run_inference.py        # cross-model inference pipeline
-├── run_analysis.py         # reproduces all paper figures and tables
-└── outputs/                # default output directory (gitignored)
+├── README.md                  # this file
+├── requirements.txt           # Python dependencies
+├── LICENSE                    # MIT
+├── reproduce_all.sh           # one-command reproduction
+├── run_inference.py           # cross-model inference pipeline
+├── run_analysis.py            # main analysis: figures 1-4, tables, ablation (§5.5)
+├── run_semantic_analysis.py   # semantic analysis of reasoning texts (§5.4)
+└── outputs/                   # default output directory (gitignored)
 ```
 
 ## Quick Reproduction
@@ -53,9 +54,28 @@ For open-weight models (Qwen3.6-35B-A3B, Gemma 4 31B), you need a local serving 
 
 ### 1. Reproduce Paper Results (Analysis Only)
 
+**Main analysis** (figures 1-4, tables, statistics):
+
 ```bash
 python run_analysis.py \
     --data ./personabeam/data/responses.parquet \
+    --output_dir ./outputs
+```
+
+**With ablation analysis** (adds figures 5-6, ablation table, JSD/sensitivity stats):
+
+```bash
+python run_analysis.py \
+    --data ./personabeam/data/responses.parquet \
+    --ablation_dir ./personabeam/ablation \
+    --output_dir ./outputs
+```
+
+**Semantic analysis** (TF-IDF vocabulary, embedding similarity):
+
+```bash
+python run_semantic_analysis.py \
+    --parquet ./personabeam/data/responses.parquet \
     --output_dir ./outputs
 ```
 
@@ -67,11 +87,17 @@ This generates:
 | `fig2_cramers_v_env_model.pdf` | Cramer's V by environment x model (Fig 2) |
 | `fig3_cross_model_agreement.pdf` | Agreement rates + pairwise matrix (Fig 3) |
 | `fig4_explorer_by_environment.pdf` | Explorer heatmap by env x model (Fig 4) |
+| `fig5_ablation_nopersona.pdf` | No-persona ablation comparison (Fig 5) |
+| `fig6_ablation_noimage.pdf` | Noise-image ablation comparison (Fig 6) |
+| `fig7_semantic_similarity.pdf` | Semantic similarity by grouping (Fig 7) |
 | `fig_latency_appendix.pdf` | Latency violin plots (Appendix) |
 | `tab_command_distribution.tex` | Command distribution table (LaTeX) |
 | `tab_cramers_v.tex` | Cramer's V table (LaTeX) |
+| `tab_ablation_nopersona_n.tex` | Per-model ablation sample sizes (LaTeX) |
+| `tab_semantic_similarity.tex` | Embedding similarity by grouping (LaTeX) |
+| `tab_persona_vocabulary.tex` | Top TF-IDF terms per persona (LaTeX) |
 
-The script also prints the full statistical summary (chi-squared tests, Cramer's V, cross-model agreement rates) to the console.
+The scripts also print full statistical summaries to the console, including chi-squared tests, Cramer's V, cross-model agreement rates, per-model ablation dropout, JSD from baseline, and sensitivity analyses.
 
 ### 2. Re-run Inference
 
@@ -129,6 +155,13 @@ When run on the full dataset (757 images x 3 personas x 5 models = 11,328 valid 
 - Per-model V range: 0.638 (Claude) to 0.691 (Qwen)
 - Unanimous agreement: ~60.4%
 - Explorer agreement: ~42.2%
+
+With ablation data (included in the dataset):
+
+- No-persona ablation: 969 valid baseline responses (N=1000 expected; Qwen accounts for all 31 missing)
+- Baseline-relative Cramer's V: Companion V=0.854, Observer V=0.474, Explorer V=0.250
+- Noise-image ablation: 651 valid responses (N=750 expected; Gemini 36% valid rate)
+- Mean JSD (noise vs real): 0.528 (all models), 0.514 (excluding Gemini)
 
 ## License
 
